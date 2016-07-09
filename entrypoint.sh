@@ -11,7 +11,7 @@ id -u zope 2>/dev/null && userdel zope
 useradd -M -u "$OWNER" zope
 
 if [ ! -f $WEBSITE/etc/zope.conf ]; then
-   /var/local/zope/bin/mkzopeinstance.py -d $WEBSITE -u "${INITIALADMIN}"
+   /usr/local/zope/bin/mkzopeinstance.py -d $WEBSITE -u "${INITIALADMIN}"
    chown -R "$OWNER" $WEBSITE
 fi
 
