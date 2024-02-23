@@ -1,27 +1,39 @@
-FROM centos:6.6
+FROM debian
+
+ENV WEBSITE=/var/local/website  \
+    PDIR=/usr/local \
+    ZDIR=/usr/local/zope \
+    INITIALADMIN="${INITIALADMIN:-admin:firsttime}" \
+    USERID=1001
 
 WORKDIR /opt
 
-ENV WEBSITE=/var/local/website PDIR=/usr/local ZDIR=/usr/local/zope
+# Decompresses automatically
+ADD Python-2.3.6.tgz .
+ADD Zope-2.7.3-0.tgz .
+
+RUN groupadd -g 10001 zope \
+   && useradd -u 10000 -g zope zope \
+   && chown -R zope:zope /opt/Zope-2.7.3-0
+
+RUN apt-get update && apt-get install -y tar build-essential zlib1g-dev \
+    && apt-get remove expat dav1d \
+    && cd /opt/Python-2.3.6 && ./configure --prefix=$PDIR && sed -i "s/^#zlib/zlib/g" Modules/Setup && make && make install \
+    && PATH=$PDIR/bin:$PATH:. \
+    && cd /opt/Zope-2.7.3-0 && ./configure --prefix=$ZDIR --with-python=$PDIR/bin/python && make && make install
+
+RUN \
+    if [ ! -f $WEBSITE/etc/zope.conf ]; then \
+        /usr/local/zope/bin/mkzopeinstance.py -d $WEBSITE -u "${INITIALADMIN}" ; \
+        chown -R "zope" $WEBSITE ; \
+    fi
+
+USER zope:zope
 
 VOLUME /var/local/website
 
 EXPOSE 8080
 
-# Decompresses automatically
-ADD Python-2.3.6.tgz .
-ADD Zope-2.7.3-0.tgz .
-ADD MySQL-python-1.2.3.tar.gz .
-ADD python-ldap-2.4.10.tar.gz .
-ADD setuptools-0.6c11-py2.3.egg ./
-ADD entrypoint.sh /
+WORKDIR $WEBSITE
 
-RUN \
-    yum install -y tar gcc gcc-c++ zlib-devel mysql mysql-devel openldap-devel \
-    && cd /opt/Python-2.3.6 && ./configure --prefix=$PDIR && sed -i "s/^#zlib/zlib/g" Modules/Setup && make && make install \
-    && cd /opt/python-ldap-2.4.10 && $PDIR/bin/python setup.py build install \
-    && cd /opt && PATH=$PDIR/bin:$PATH:. setuptools-0.6c11-py2.3.egg \
-    && cd /opt/MySQL-python-1.2.3 && $PDIR/bin/python setup.py build install \
-    && cd /opt/Zope-2.7.3-0 && ./configure --prefix=$ZDIR --with-python=$PDIR/bin/python && make && make install
-
-CMD /entrypoint.sh
+ENTRYPOINT ["bin/zopectl", "fg"]
