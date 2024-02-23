@@ -1,21 +1,16 @@
 Zope 2.7.3 installation
 ========================
 
-This Dockerfile installs Python 2.3.6, MySQL database connector, Python LDAP
-and Zope 2.7.3 from source packages. For convenience the packages are in
-the directory, as they are 10 years old.
+This Dockerfile installs Python 2.3.6 and Zope 2.7.3 from source packages.
+For convenience the packages are in the directory, as they are 10 years old.
 
 The installation expects the Zope instance to be located in /var/local/website
-in the container namespace. This can then be mapped to whatever you want in the
-docker-compose.yml file.
+in the container namespace.
 
 The Python interpreter is installed in /usr/local/bin/python and zope in /usr/local/zope
 
 If the container doesn't find an etc/zope.conf file, then it creates a new instance
 in /var/local/website.
-
-You can set the user id to run zope as by setting the environment variable USERID to
-a numeric value. If not set, then it defaults to 600.
 
 Configuration
 -------------
@@ -39,5 +34,6 @@ Sources
 Building
 --------
 
-The build the container locally do `docker-compose build`. When you push the changes to GitHub,
-then the Docker Hub will build and publish at eeacms/zope-2-7.3:latest
+```
+docker build --no-cache -t antojf/zope-2-7:2.7.3-light-secure .
+```
