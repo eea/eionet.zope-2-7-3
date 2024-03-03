@@ -1,12 +1,7 @@
-
-# This file is not usable for production. Instead of build, use image: eeacms/zope-2-7-2:latest
-web:
-  build: .
-  environment:
-    USERID: 1001
-    INITIALADMIN: admin:changeme
-  ports:
-  - "80:8080"
-  volumes:
-  - zope-website:/var/local/website
-
+services:
+  zope:
+    image: antojf/zope-2-7:2.7.3-light-secure
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./website:/var/local/website

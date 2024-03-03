@@ -1,4 +1,4 @@
-FROM debian
+FROM debian:bookworm-slim
 
 ENV WEBSITE=/var/local/website  \
     PDIR=/usr/local \
